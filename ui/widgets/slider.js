@@ -53,6 +53,7 @@ return $.widget( "ui.slider", $.ui.mouse, {
 		min: 0,
 		orientation: "horizontal",
 		range: false,
+		rangeDragable: false,
 		step: 1,
 		value: 0,
 		values: null,
@@ -73,6 +74,7 @@ return $.widget( "ui.slider", $.ui.mouse, {
 		this._mouseSliding = false;
 		this._animateOff = true;
 		this._handleIndex = null;
+		this._rangeDragStart = null;
 		this._detectOrientation();
 		this._mouseInit();
 		this._calculateNewMax();
@@ -196,6 +198,15 @@ return $.widget( "ui.slider", $.ui.mouse, {
 		position = { x: event.pageX, y: event.pageY };
 		normValue = this._normValueFromMouse( position );
 		distance = this._valueMax() - this._valueMin() + 1;
+
+		// 点击range区域，不做handle处理
+		if (o.rangeDragable && that.handles.length == 2) {
+			var clickOnRange = normValue > that.values(0) && normValue < that.values(1);
+			if (clickOnRange) {
+				return true;
+			}
+		}
+
 		this.handles.each( function( i ) {
 			var thisDistance = Math.abs( normValue - that.values( i ) );
 			if ( ( distance > thisDistance ) ||
@@ -259,6 +270,7 @@ return $.widget( "ui.slider", $.ui.mouse, {
 		this._handleIndex = null;
 		this._clickOffset = null;
 		this._animateOff = false;
+		this._rangeDragStart = null;
 
 		return false;
 	},
@@ -329,16 +341,37 @@ return $.widget( "ui.slider", $.ui.mouse, {
 			currentValue = this.value(),
 			newValues = this.values();
 
-		if ( this._hasMultipleValues() ) {
-			otherVal = this.values( index ? 0 : 1 );
-			currentValue = this.values( index );
-
-			if ( this.options.values.length === 2 && this.options.range === true ) {
-				newVal =  index === 0 ? Math.min( otherVal, newVal ) : Math.max( otherVal, newVal );
+		var dragRange = !index && typeof index === 'object';
+		if (this.options.rangeDragable && dragRange && this.handles.length == 2) {
+			// 触发拖动事件时，如果没有设置起始位置，先记录起始位置，下一次事件响应根据起始位置记录
+			if (!this._rangeDragStart) {
+				this._rangeDragStart = newVal;
+				return;
+			} else {
+				var diff = newVal - this._rangeDragStart;
+				this._rangeDragStart = newVal;
+				newValues[0] = newValues[0] + diff;
+				newValues[1] = newValues[1] + diff;
+				console.log(newValues[0], newValues[1], diff);
+				if (diff == 0 || newValues[0] < this._valueMin() || newValues[1] > this._valueMax()) {
+					currentValue = newVal;
+				} else {
+					currentValue = -newVal;					
+				}
 			}
+		} else {
+			if ( this._hasMultipleValues() ) {
+				otherVal = this.values( index ? 0 : 1 );
+				currentValue = this.values( index );
 
-			newValues[ index ] = newVal;
+				if ( this.options.values.length === 2 && this.options.range === true ) {
+					newVal =  index === 0 ? Math.min( otherVal, newVal ) : Math.max( otherVal, newVal );
+				}
+
+				newValues[ index ] = newVal;
+			}			
 		}
+
 
 		if ( newVal === currentValue ) {
 			return;
@@ -352,7 +385,12 @@ return $.widget( "ui.slider", $.ui.mouse, {
 		}
 
 		if ( this._hasMultipleValues() ) {
-			this.values( index, newVal );
+			if (dragRange) {
+				this.values( 0, newValues[0] );
+				this.values( 1, newValues[1] );
+			} else {
+				this.values( index, newVal );				
+			}
 		} else {
 			this.value( newVal );
 		}

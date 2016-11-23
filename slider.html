@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" href="./themes/base/all.css">
+	<style type="text/css">
+		.container {
+			margin: 0 10px;
+		}
+	</style>
+	<title>百度地图API</title>
+</head>
+<body>
+	<div id="allmap"></div>
+	<div>
+		<p>点击地图选点，然后点击标注按钮。</p>
+		<div class="container">
+			<div id="slider"></div>			
+		</div>
+	</div>
+
+	<!-- <script src="http://cdn.staticfile.org/jquery/3.1.1/jquery.min.js"></script> -->
+	<script src="./external/jquery-2.2.4/jquery.js"></script>
+	<!-- <script src="./dist/jquery-ui.min.js"></script> -->
+	<script src="./dist/jquery-ui.js"></script>
+	<script type="text/javascript">
+		$('#slider').slider({
+			rangeDragable: true,
+			range: true,
+      min: 0,
+      max: 100,
+			values: [60, 80],
+			slide: function (event, ui) {
+				console.log('event', ui.values[0], ui.values[1]);
+			}
+		});
+	</script>
+</body>
+</html>
