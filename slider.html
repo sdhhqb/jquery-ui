@@ -14,6 +14,7 @@
 <body>
 	<div id="allmap"></div>
 	<div>
+		<a href="javascript:0;">test</a>
 		<p>点击地图选点，然后点击标注按钮。</p>
 		<div class="container">
 			<div id="slider"></div>			
@@ -27,6 +28,7 @@
 	<script type="text/javascript">
 		$('#slider').slider({
 			rangeDragable: true,
+			minRange: 7,
 			range: true,
       min: 0,
       max: 100,

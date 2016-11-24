@@ -54,6 +54,7 @@ return $.widget( "ui.slider", $.ui.mouse, {
 		orientation: "horizontal",
 		range: false,
 		rangeDragable: false,
+		minRange: null,
 		step: 1,
 		value: 0,
 		values: null,
@@ -366,6 +367,11 @@ return $.widget( "ui.slider", $.ui.mouse, {
 
 				if ( this.options.values.length === 2 && this.options.range === true ) {
 					newVal =  index === 0 ? Math.min( otherVal, newVal ) : Math.max( otherVal, newVal );
+					if (this.options.minRange) {
+						if (Math.abs(newVal - otherVal) < this.options.minRange) {
+							currentValue = newVal;
+						}						
+					}
 				}
 
 				newValues[ index ] = newVal;
